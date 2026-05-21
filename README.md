@@ -57,7 +57,7 @@ To run the program, launch it from the build/bin folder:
 
 ```bash
 cd build/bin
-./<filename>.exe
+./Boids
 ```
 
 ## Libraries

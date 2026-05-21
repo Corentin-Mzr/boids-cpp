@@ -50,4 +50,4 @@ jobs:
             -p build/ \
             -j$(nproc) \
             -warnings-as-errors="*" \
-            "src/.*\.(cpp|cc|cxx)$"
+            "$(pwd)/src/.*\.(cpp|cc|cxx)$"

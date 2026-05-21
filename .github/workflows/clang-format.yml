@@ -23,7 +23,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          find src include \
+          find src \
             \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \
             -o -name "*.hpp" -o -name "*.h" \) \
             | xargs clang-format --dry-run --Werror
