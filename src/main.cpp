@@ -15,13 +15,17 @@
 int main()
 {
     WorldConfig world_config(-50.0f, 50.0f, -50.0f, 50.0f);
-    BoidConfig boid_config(-1.0f, 1.0f, 1.0f, 5.0f);
-    SimConfig sim_config(42, 100, 1.0 / 60.0f);
+    BoidConfig boid_config(4.0f, 4.0f, 12.0f, 12.0f, 16.0f);
+    SimConfig sim_config(42, 100, 1.0f / 60.0f);
+
+    sim_config.w_alignment = 0.5f;
+    sim_config.w_cohesion = 0.0f;
+    sim_config.w_separation = 1.0f;
 
     Simulation simulation(world_config, boid_config, sim_config);
 
-    sf::Vector2f world_center = sf::Vector2f(world_config.xmax + world_config.xmin, world_config.ymax + world_config.ymin) * 0.5f;
-    sf::Vector2f world_size = sf::Vector2f(world_config.xmax - world_config.xmin, world_config.ymax - world_config.ymin);
+    auto world_center = sf::Vector2f(world_config.xmax + world_config.xmin, world_config.ymax + world_config.ymin) * 0.5f;
+    sf::Vector2f world_size(world_config.xmax - world_config.xmin, world_config.ymax - world_config.ymin);
 
     sf::RenderWindow window(sf::VideoMode({800, 600}), "My window");
     sf::View view(world_center, world_size);

@@ -6,8 +6,8 @@ WorldConfig::WorldConfig(float xmin, float xmax, float ymin, float ymax)
 {
 }
 
-BoidConfig::BoidConfig(float vmin, float vmax, float steer, float radius)
-    : vmin(vmin), vmax(vmax), steermin(steer), steermax(steer),
+BoidConfig::BoidConfig(float vmin, float vmax, float steermin, float steermax, float radius)
+    : vmin(vmin), vmax(vmax), steermin(steermin), steermax(steermax),
       alignment_radius_min(radius), alignment_radius_max(radius),
       cohesion_radius_min(radius), cohesion_radius_max(radius),
       separation_radius_min(radius), separation_radius_max(radius)
@@ -49,19 +49,28 @@ std::vector<Boid> Simulation::create_random_boids()
     std::uniform_real_distribution<float> dist_x(world_config.xmin, world_config.xmax);
     std::uniform_real_distribution<float> dist_y(world_config.ymin, world_config.ymax);
 
-    std::uniform_real_distribution<float> dist_vx(boid_config.vmin, boid_config.vmax);
-    std::uniform_real_distribution<float> dist_vy(boid_config.vmin, boid_config.vmax);
+    std::uniform_real_distribution<float> dist_steer(boid_config.steermin, boid_config.steermax);
+    std::uniform_real_distribution<float> dist_v(boid_config.vmin, boid_config.vmax);
+
+    std::uniform_real_distribution<float> dist_vx(-1.0f, 1.0f);
+    std::uniform_real_distribution<float> dist_vy(-1.0f, 1.0f);
+
+    std::uniform_real_distribution<float> dist_radius_align(boid_config.alignment_radius_min, boid_config.alignment_radius_max);
+    std::uniform_real_distribution<float> dist_radius_cohesion(boid_config.cohesion_radius_min, boid_config.cohesion_radius_max);
+    std::uniform_real_distribution<float> dist_radius_separation(boid_config.separation_radius_min, boid_config.separation_radius_max);
 
     std::vector<Boid> boids(sim_config.count);
     for (std::size_t i = 0; i < sim_config.count; ++i)
     {
-        float x = dist_x(rd);
-        float y = dist_y(rd);
-        float vx = dist_vx(rd);
-        float vy = dist_vy(rd);
+        boids[i].position = {dist_x(rd), dist_y(rd)};
+        boids[i].velocity = {dist_vx(rd), dist_vy(rd)};
 
-        boids[i].position = {x, y};
-        boids[i].velocity = {vx, vy};
+        boids[i].max_steer = dist_steer(rd);
+        boids[i].max_velocity = dist_v(rd);
+
+        boids[i].alignment_radius = dist_radius_align(rd);
+        boids[i].cohesion_radius = dist_radius_cohesion(rd);
+        boids[i].separation_radius = dist_radius_separation(rd);
     }
 
     return boids;
@@ -93,25 +102,24 @@ void Simulation::handle_boundaries()
     }
 }
 
-std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i, const std::vector<Boid> &boids)
+std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i, const std::vector<Boid> &snapshot, float perception_radius)
 {
-    if (i >= boids.size())
+    if (i >= snapshot.size())
     {
         return {};
     }
 
     std::vector<std::size_t> result;
-    sf::Vector2f position = boids[i].position;
-    float perception_radius = boids[i].perception_radius;
+    sf::Vector2f position = snapshot[i].position;
 
-    for (std::size_t j = 0; j < boids.size(); ++j)
+    for (std::size_t j = 0; j < snapshot.size(); ++j)
     {
         if (i == j)
         {
             continue;
         }
 
-        float dist_sq = (position - boids[j].position).lengthSquared();
+        float dist_sq = (position - snapshot[j].position).lengthSquared();
 
         if (dist_sq <= perception_radius * perception_radius)
         {
@@ -122,12 +130,12 @@ std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i, const std
     return result;
 }
 
-void Simulation::alignment(Boid &b, const std::vector<Boid> &boids, const std::vector<std::size_t> &neighbors, float weight)
+void Simulation::alignment(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight)
 {
     sf::Vector2f average_velocity;
     for (const auto j : neighbors)
     {
-        average_velocity += boids[j].velocity;
+        average_velocity += snapshot[j].velocity;
     }
 
     average_velocity /= static_cast<float>(neighbors.size());
@@ -136,12 +144,12 @@ void Simulation::alignment(Boid &b, const std::vector<Boid> &boids, const std::v
     b.steer(b.position + average_velocity);
 }
 
-void Simulation::cohesion(Boid &b, const std::vector<Boid> &boids, const std::vector<std::size_t> &neighbors, float weight)
+void Simulation::cohesion(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight)
 {
     sf::Vector2f average_position;
     for (const auto j : neighbors)
     {
-        average_position += boids[j].position;
+        average_position += snapshot[j].position;
     }
 
     average_position /= static_cast<float>(neighbors.size());
@@ -150,12 +158,12 @@ void Simulation::cohesion(Boid &b, const std::vector<Boid> &boids, const std::ve
     b.steer(target);
 }
 
-void Simulation::separation(Boid &b, const std::vector<Boid> &boids, const std::vector<std::size_t> &neighbors, float weight)
+void Simulation::separation(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight)
 {
     sf::Vector2f position_diff;
     for (const auto j : neighbors)
     {
-        sf::Vector2f delta = b.position - boids[j].position;
+        sf::Vector2f delta = b.position - snapshot[j].position;
         float dist_sq = delta.lengthSquared();
 
         if (dist_sq < 1e-8)
@@ -174,21 +182,27 @@ void Simulation::separation(Boid &b, const std::vector<Boid> &boids, const std::
 
 void Simulation::apply_boid_rules()
 {
-    std::vector<Boid> new_boids = boids;
+    const std::vector<Boid> snapshot = boids;
 
     for (std::size_t i = 0; i < boids.size(); ++i)
     {
-        auto nearest = find_nearest_boids(i, boids);
+        auto nearest_align = find_nearest_boids(i, snapshot, boids[i].alignment_radius);
+        auto nearest_cohesion = find_nearest_boids(i, snapshot, boids[i].cohesion_radius);
+        auto nearest_separation = find_nearest_boids(i, snapshot, boids[i].separation_radius);
 
-        if (nearest.empty())
+        if (!nearest_align.empty())
         {
-            continue;
+            alignment(boids[i], snapshot, nearest_align, sim_config.w_alignment);
         }
 
-        alignment(new_boids[i], boids, nearest, sim_config.w_alignment);
-        cohesion(new_boids[i], boids, nearest, sim_config.w_cohesion);
-        separation(new_boids[i], boids, nearest, sim_config.w_separation);
-    }
+        if (!nearest_cohesion.empty())
+        {
+            cohesion(boids[i], snapshot, nearest_cohesion, sim_config.w_cohesion);
+        }
 
-    std::swap(boids, new_boids);
+        if (!nearest_separation.empty())
+        {
+            separation(boids[i], snapshot, nearest_separation, sim_config.w_separation);
+        }
+    }
 }

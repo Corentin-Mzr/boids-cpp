@@ -22,7 +22,10 @@ public:
 
     float max_velocity = 5.0f;
     float max_steer = 10.0f;
-    float perception_radius = 5.0f;
+
+    float alignment_radius = 5.0f;
+    float cohesion_radius = 5.0f;
+    float separation_radius = 5.0f;
 
     // Rendering
     sf::Color color = sf::Color::White;    

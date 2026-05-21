@@ -10,7 +10,7 @@ Boid::Boid(const sf::Vector2f &position, const sf::Vector2f &velocity)
 void Boid::update(float dt)
 {
     velocity += acceleration * dt;
-    if (velocity.length() > max_velocity)
+    // if (velocity.length() > max_velocity)
     {
         velocity = max_velocity * velocity.normalized();
     }
@@ -30,7 +30,7 @@ void Boid::steer(const sf::Vector2f &target_position)
     desired_direction = max_velocity * desired_direction.normalized();
     sf::Vector2f steering_force = desired_direction - velocity;
 
-    if (steering_force.lengthSquared() > max_steer * max_steer)
+    // if (steering_force.lengthSquared() > max_steer * max_steer)
     {
         steering_force = max_steer * steering_force.normalized();
     }
