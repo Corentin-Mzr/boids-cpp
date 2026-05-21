@@ -1,10 +1,9 @@
 #include "boid.hpp"
 #include "utils.hpp"
 
-Boid::Boid(const sf::Vector2f &position, const sf::Vector2f &velocity) 
+Boid::Boid(const sf::Vector2f& position, const sf::Vector2f& velocity)
     : position(position), velocity(velocity)
 {
-
 }
 
 void Boid::update(float dt)
@@ -19,7 +18,7 @@ void Boid::update(float dt)
     acceleration *= 0.0f;
 }
 
-void Boid::steer(const sf::Vector2f &target_position)
+void Boid::steer(const sf::Vector2f& target_position)
 {
     sf::Vector2f desired_direction = target_position - position;
     if (desired_direction.lengthSquared() < 1e-8)
@@ -38,7 +37,7 @@ void Boid::steer(const sf::Vector2f &target_position)
     apply_force(steering_force);
 }
 
-void Boid::apply_force(const sf::Vector2f &force)
+void Boid::apply_force(const sf::Vector2f& force)
 {
     acceleration += force;
 }
@@ -47,7 +46,7 @@ sf::VertexArray Boid::mesh() const noexcept
 {
     sf::VertexArray mesh(sf::PrimitiveType::Triangles, 3);
 
-    float angle = atan2(velocity.y, velocity.x);
+    float angle = std::atan2(velocity.y, velocity.x);
 
     mesh[0].position = rotate_vec({-0.5f, -0.5f}, angle) + position;
     mesh[1].position = rotate_vec({1.0f, 0.0f}, angle) + position;
@@ -59,4 +58,3 @@ sf::VertexArray Boid::mesh() const noexcept
 
     return mesh;
 }
-

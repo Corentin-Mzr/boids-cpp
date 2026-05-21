@@ -46,28 +46,33 @@ struct SimConfig
 class Simulation
 {
 public:
-    Simulation(const WorldConfig &world_config, const BoidConfig &boid_config, const SimConfig &sim_config);
+    Simulation(const WorldConfig& world_config, const BoidConfig& boid_config,
+               const SimConfig& sim_config);
     ~Simulation() = default;
 
     void step();
 
     [[nodiscard]]
-    const std::vector<Boid> &get_boids() const noexcept;
+    const std::vector<Boid>& get_boids() const noexcept;
 
 private:
     [[nodiscard]]
-    std::vector<Boid> create_random_boids();
+    std::vector<Boid> create_random_boids() const;
 
     void apply_boid_rules();
     void handle_boundaries();
 
     // Returns indices of boids closest to the i-th boid
     [[nodiscard]]
-    std::vector<std::size_t> find_nearest_boids(std::size_t i, const std::vector<Boid> &snapshot, float perception_radius);
+    std::vector<std::size_t> find_nearest_boids(std::size_t i, const std::vector<Boid>& snapshot,
+                                                float perception_radius) const;
 
-    void alignment(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight);
-    void cohesion(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight);
-    void separation(Boid &b, const std::vector<Boid> &snapshot, const std::vector<std::size_t> &neighbors, float weight);
+    void alignment(Boid& b, const std::vector<Boid>& snapshot,
+                   const std::vector<std::size_t>& neighbors, float weight) const;
+    void cohesion(Boid& b, const std::vector<Boid>& snapshot,
+                  const std::vector<std::size_t>& neighbors, float weight) const;
+    void separation(Boid& b, const std::vector<Boid>& snapshot,
+                    const std::vector<std::size_t>& neighbors, float weight) const;
 
 private:
     WorldConfig world_config;

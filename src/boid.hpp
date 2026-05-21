@@ -4,17 +4,16 @@
 
 struct Boid
 {
-
 public:
-    Boid(const sf::Vector2f &position = {}, const sf::Vector2f &velocity = {0.0f, 1.0f});
+    explicit Boid(const sf::Vector2f& position = {}, const sf::Vector2f& velocity = {0.0f, 1.0f});
 
     void update(float dt);
-    void steer(const sf::Vector2f &target_position);
-    void apply_force(const sf::Vector2f &force);
+    void steer(const sf::Vector2f& target_position);
+    void apply_force(const sf::Vector2f& force);
 
-    [[nodiscard]] 
+    [[nodiscard]]
     sf::VertexArray mesh() const noexcept;
-    
+
     // Physics
     sf::Vector2f position = {};
     sf::Vector2f velocity = {};
@@ -28,5 +27,5 @@ public:
     float separation_radius = 5.0f;
 
     // Rendering
-    sf::Color color = sf::Color::White;    
+    sf::Color color = sf::Color::White;
 };

@@ -1,16 +1,15 @@
 #include <SFML/Graphics.hpp>
-#include <vector>
 #include <cmath>
 #include <iostream>
 #include <random>
+#include <vector>
 
-#include "imgui.h"
 #include "imgui-SFML.h"
+#include "imgui.h"
 
-#include "utils.hpp"
 #include "boid.hpp"
 #include "simulation.hpp"
-
+#include "utils.hpp"
 
 int main()
 {
@@ -24,8 +23,11 @@ int main()
 
     Simulation simulation(world_config, boid_config, sim_config);
 
-    auto world_center = sf::Vector2f(world_config.xmax + world_config.xmin, world_config.ymax + world_config.ymin) * 0.5f;
-    sf::Vector2f world_size(world_config.xmax - world_config.xmin, world_config.ymax - world_config.ymin);
+    auto world_center =
+        sf::Vector2f(world_config.xmax + world_config.xmin, world_config.ymax + world_config.ymin) *
+        0.5f;
+    sf::Vector2f world_size(world_config.xmax - world_config.xmin,
+                            world_config.ymax - world_config.ymin);
 
     sf::RenderWindow window(sf::VideoMode({800, 600}), "My window");
     sf::View view(world_center, world_size);
@@ -70,7 +72,7 @@ int main()
 
         window.clear(sf::Color::Black);
 
-        for (const auto &b : simulation.get_boids())
+        for (const auto& b : simulation.get_boids())
         {
             window.draw(b.mesh());
         }
