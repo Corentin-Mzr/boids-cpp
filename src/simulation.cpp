@@ -107,7 +107,7 @@ void Simulation::handle_boundaries()
 
 std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i,
                                                         const std::vector<Boid>& snapshot,
-                                                        float perception_radius) const
+                                                        float perception_radius)
 {
     if (i >= snapshot.size())
     {
@@ -136,7 +136,7 @@ std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i,
 }
 
 void Simulation::alignment(Boid& b, const std::vector<Boid>& snapshot,
-                           const std::vector<std::size_t>& neighbors, float weight) const
+                           const std::vector<std::size_t>& neighbors, float weight)
 {
     sf::Vector2f average_velocity;
     for (const auto j : neighbors)
@@ -151,7 +151,7 @@ void Simulation::alignment(Boid& b, const std::vector<Boid>& snapshot,
 }
 
 void Simulation::cohesion(Boid& b, const std::vector<Boid>& snapshot,
-                          const std::vector<std::size_t>& neighbors, float weight) const
+                          const std::vector<std::size_t>& neighbors, float weight)
 {
     sf::Vector2f average_position;
     for (const auto j : neighbors)
@@ -166,7 +166,7 @@ void Simulation::cohesion(Boid& b, const std::vector<Boid>& snapshot,
 }
 
 void Simulation::separation(Boid& b, const std::vector<Boid>& snapshot,
-                            const std::vector<std::size_t>& neighbors, float weight) const
+                            const std::vector<std::size_t>& neighbors, float weight)
 {
     sf::Vector2f position_diff;
     for (const auto j : neighbors)

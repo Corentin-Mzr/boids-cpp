@@ -50,6 +50,11 @@ public:
                const SimConfig& sim_config);
     ~Simulation() = default;
 
+    Simulation(const Simulation&) = delete;
+    Simulation& operator=(const Simulation&) = delete;
+    Simulation(Simulation&&) = default;
+    Simulation& operator=(Simulation&&) = default;
+
     void step();
 
     [[nodiscard]]
@@ -64,15 +69,15 @@ private:
 
     // Returns indices of boids closest to the i-th boid
     [[nodiscard]]
-    std::vector<std::size_t> find_nearest_boids(std::size_t i, const std::vector<Boid>& snapshot,
-                                                float perception_radius) const;
+    static std::vector<std::size_t>
+    find_nearest_boids(std::size_t i, const std::vector<Boid>& snapshot, float perception_radius);
 
-    void alignment(Boid& b, const std::vector<Boid>& snapshot,
-                   const std::vector<std::size_t>& neighbors, float weight) const;
-    void cohesion(Boid& b, const std::vector<Boid>& snapshot,
-                  const std::vector<std::size_t>& neighbors, float weight) const;
-    void separation(Boid& b, const std::vector<Boid>& snapshot,
-                    const std::vector<std::size_t>& neighbors, float weight) const;
+    static void alignment(Boid& b, const std::vector<Boid>& snapshot,
+                          const std::vector<std::size_t>& neighbors, float weight);
+    static void cohesion(Boid& b, const std::vector<Boid>& snapshot,
+                         const std::vector<std::size_t>& neighbors, float weight);
+    static void separation(Boid& b, const std::vector<Boid>& snapshot,
+                           const std::vector<std::size_t>& neighbors, float weight);
 
 private:
     WorldConfig world_config;

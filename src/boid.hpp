@@ -15,9 +15,9 @@ public:
     sf::VertexArray mesh() const noexcept;
 
     // Physics
-    sf::Vector2f position = {};
-    sf::Vector2f velocity = {};
-    sf::Vector2f acceleration = {};
+    sf::Vector2f position;
+    sf::Vector2f velocity;
+    sf::Vector2f acceleration;
 
     float max_velocity = 5.0f;
     float max_steer = 10.0f;
