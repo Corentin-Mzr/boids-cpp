@@ -46,7 +46,7 @@ sf::VertexArray Boid::mesh() const noexcept
 {
     sf::VertexArray mesh(sf::PrimitiveType::Triangles, 3);
 
-    float angle = std::atan2(velocity.y, velocity.x);
+    const float angle = std::atan2(velocity.y, velocity.x);
 
     mesh[0].position = rotate_vec({-0.5f, -0.5f}, angle) + position;
     mesh[1].position = rotate_vec({1.0f, 0.0f}, angle) + position;

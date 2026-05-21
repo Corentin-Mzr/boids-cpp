@@ -115,7 +115,7 @@ std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i,
     }
 
     std::vector<std::size_t> result;
-    sf::Vector2f position = snapshot[i].position;
+    const sf::Vector2f position = snapshot[i].position;
 
     for (std::size_t j = 0; j < snapshot.size(); ++j)
     {
@@ -124,7 +124,7 @@ std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i,
             continue;
         }
 
-        float dist_sq = (position - snapshot[j].position).lengthSquared();
+        const float dist_sq = (position - snapshot[j].position).lengthSquared();
 
         if (dist_sq <= perception_radius * perception_radius)
         {
@@ -161,7 +161,7 @@ void Simulation::cohesion(Boid& b, const std::vector<Boid>& snapshot,
 
     average_position /= static_cast<float>(neighbors.size());
 
-    sf::Vector2f target = average_position * weight + b.position * (1.0f - weight);
+    const sf::Vector2f target = average_position * weight + b.position * (1.0f - weight);
     b.steer(target);
 }
 
@@ -171,8 +171,8 @@ void Simulation::separation(Boid& b, const std::vector<Boid>& snapshot,
     sf::Vector2f position_diff;
     for (const auto j : neighbors)
     {
-        sf::Vector2f delta = b.position - snapshot[j].position;
-        float dist_sq = delta.lengthSquared();
+        const sf::Vector2f delta = b.position - snapshot[j].position;
+        const float dist_sq = delta.lengthSquared();
 
         if (dist_sq < 1e-8)
         {
@@ -194,9 +194,9 @@ void Simulation::apply_boid_rules()
 
     for (std::size_t i = 0; i < boids.size(); ++i)
     {
-        auto nearest_align = find_nearest_boids(i, snapshot, boids[i].alignment_radius);
-        auto nearest_cohesion = find_nearest_boids(i, snapshot, boids[i].cohesion_radius);
-        auto nearest_separation = find_nearest_boids(i, snapshot, boids[i].separation_radius);
+        const auto nearest_align = find_nearest_boids(i, snapshot, boids[i].alignment_radius);
+        const auto nearest_cohesion = find_nearest_boids(i, snapshot, boids[i].cohesion_radius);
+        const auto nearest_separation = find_nearest_boids(i, snapshot, boids[i].separation_radius);
 
         if (!nearest_align.empty())
         {
