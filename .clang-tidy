@@ -1,0 +1,49 @@
+Checks: >
+    bugprone-*,
+    performance-*,
+    modernize-*,
+    readability-*,
+    cppcoreguidelines-*,
+    portability-*,
+    clang-analyzer-*
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '.*'
+
+AnalyzeTemporaryDtors: false
+
+CheckOptions:
+
+    # Modernize
+    - key: modernize-use-nullptr.NullMacros
+      value: 'NULL'
+
+    - key: modernize-loop-convert.MinConfidence
+      value: reasonable
+
+    # Readability
+    - key: readability-identifier-naming.NamespaceCase
+      value: lower_case
+
+    - key: readability-identifier-naming.FunctionCase
+      value: lower_case
+
+    - key: readability-identifier-naming.VariableCase
+      value: lower_case
+
+    - key: readability-identifier-naming.MemberCase
+      value: lower_case
+
+    - key: readability-identifier-naming.ParameterCase
+      value: lower_case
+
+    # Performance
+    - key: performance-for-range-copy.WarnOnAllAutoCopies
+      value: false
+
+    # cppcoreguidelines
+    - key: cppcoreguidelines-avoid-magic-numbers.IgnorePowersOf2IntegerValues
+      value: true
+
+FormatStyle: file
