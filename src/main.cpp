@@ -17,8 +17,8 @@ int main()
     BoidConfig boid_config(4.0f, 4.0f, 12.0f, 12.0f, 16.0f);
     SimConfig sim_config(42, 100, 1.0f / 60.0f);
 
-    sim_config.w_alignment = 0.5f;
-    sim_config.w_cohesion = 0.0f;
+    sim_config.w_alignment = 1.0f;
+    sim_config.w_cohesion = 1.0f;
     sim_config.w_separation = 1.0f;
 
     Simulation simulation(world_config, boid_config, sim_config);
