@@ -1,6 +1,8 @@
-# Rubik's Cube Solver
+# Boids-Cpp
 
 ## Description
+
+Flock simulation based on [**Craig W. Reynolds rules**](https://en.wikipedia.org/wiki/Boids).
 
 ## Example
 
@@ -13,7 +15,7 @@
 - C++ compiler (gcc, g++, cl, clang)
 - CMake >= 3.30
 
-For Linux/Ubuntu, you also need to install the following dependencies:  
+For Linux, you also need to install the following dependencies:  
 
 ```bash
 sudo apt-get update
@@ -37,7 +39,7 @@ sudo apt-get install -y libx11-dev \
 ### Clone the repository
 
 ```bash
-git clone https://github.com/Corentin-Mzr/<repo-name>.git
+git clone https://github.com/Corentin-Mzr/boids-cpp.git
 ```
 
 ### Build the project
@@ -63,6 +65,7 @@ cd build/bin
 The following libraries have been used for this program:
 
 - [**SFML**](https://github.com/SFML/SFML)
+- [**ImGui**](https://github.com/ocornut/imgui)
 
 ## License
 
