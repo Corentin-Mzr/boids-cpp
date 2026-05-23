@@ -1,7 +1,7 @@
 #include "boid.hpp"
 #include "utils.hpp"
 
-constexpr float VECTOR_LENGTH_THRESHOLD = 1e-8f;
+constexpr float vector_length_threshold = 1e-8f;
 
 [[nodiscard]]
 sf::Color create_highlight_color(const sf::Color& color) noexcept
@@ -34,7 +34,7 @@ Boid::Boid(const sf::Vector2f& position, const sf::Vector2f& velocity)
 void Boid::update(float dt)
 {
     velocity += acceleration * dt;
-    velocity = velocity.lengthSquared() >= VECTOR_LENGTH_THRESHOLD
+    velocity = velocity.lengthSquared() >= vector_length_threshold
                    ? max_velocity * velocity.normalized()
                    : sf::Vector2f{};
     position += velocity * dt;
@@ -44,14 +44,14 @@ void Boid::update(float dt)
 void Boid::steer(const sf::Vector2f& target_position)
 {
     sf::Vector2f desired_direction = target_position - position;
-    if (desired_direction.lengthSquared() < VECTOR_LENGTH_THRESHOLD)
+    if (desired_direction.lengthSquared() < vector_length_threshold)
     {
         return;
     }
 
     desired_direction = max_velocity * desired_direction.normalized();
     sf::Vector2f steering_force = desired_direction - velocity;
-    if (steering_force.lengthSquared() < VECTOR_LENGTH_THRESHOLD)
+    if (steering_force.lengthSquared() < vector_length_threshold)
     {
         return;
     }

@@ -17,6 +17,7 @@ Checks: >
     -misc-include-cleaner,
     -misc-misplaced-const,
     -misc-non-private-member-variables-in-classes,
+    -cppcoreguidelines-pro-type-vararg,
 
 WarningsAsErrors: ''
 
