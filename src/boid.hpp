@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
 struct Boid
@@ -13,6 +14,18 @@ public:
 
     [[nodiscard]]
     sf::VertexArray mesh() const noexcept;
+
+    [[nodiscard]]
+    sf::VertexArray highlight() const noexcept;
+
+    [[nodiscard]]
+    sf::CircleShape debug_alignment_radius() const noexcept;
+
+    [[nodiscard]]
+    sf::CircleShape debug_cohesion_radius() const noexcept;
+
+    [[nodiscard]]
+    sf::CircleShape debug_separation_radius() const noexcept;
 
     // Physics
     sf::Vector2f position;
