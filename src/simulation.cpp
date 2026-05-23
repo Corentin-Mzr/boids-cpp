@@ -1,23 +1,6 @@
 #include "simulation.hpp"
 #include <random>
 
-WorldConfig::WorldConfig(float xmin, float xmax, float ymin, float ymax)
-    : xmin(xmin), xmax(xmax), ymin(ymin), ymax(ymax)
-{
-}
-
-BoidConfig::BoidConfig(float vmin, float vmax, float steermin, float steermax, float radius)
-    : vmin(vmin), vmax(vmax), steermin(steermin), steermax(steermax), alignment_radius_min(radius),
-      alignment_radius_max(radius), cohesion_radius_min(radius), cohesion_radius_max(radius),
-      separation_radius_min(radius), separation_radius_max(radius)
-{
-}
-
-SimConfig::SimConfig(int seed, std::size_t n, float dt)
-    : seed(seed), count(n), dt(dt), w_alignment(1.0f), w_cohesion(1.0f), w_separation(1.0f)
-{
-}
-
 Simulation::Simulation(const WorldConfig& world_config, const BoidConfig& boid_config,
                        const SimConfig& sim_config)
     : world_config(world_config), boid_config(boid_config), sim_config(sim_config)

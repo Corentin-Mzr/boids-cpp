@@ -9,8 +9,6 @@ struct WorldConfig
     float xmax = {};
     float ymin = {};
     float ymax = {};
-
-    WorldConfig(float xmin, float xmax, float ymin, float ymax);
 };
 
 // About the boids: speed, steering, perception radius etc.
@@ -26,8 +24,6 @@ struct BoidConfig
     float cohesion_radius_max = {};
     float separation_radius_min = {};
     float separation_radius_max = {};
-
-    BoidConfig(float vmin, float vmax, float steermin, float steermax, float radius);
 };
 
 // About the simulation: seed, boid count, rule weights
@@ -39,8 +35,6 @@ struct SimConfig
     float w_alignment = {};
     float w_cohesion = {};
     float w_separation = {};
-
-    SimConfig(int seed, std::size_t n, float dt);
 };
 
 class Simulation
