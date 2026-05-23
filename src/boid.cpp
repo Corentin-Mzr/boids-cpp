@@ -1,12 +1,14 @@
 #include "boid.hpp"
 #include "utils.hpp"
 
+constexpr float VECTOR_LENGTH_THRESHOLD = 1e-8f;
+
 [[nodiscard]]
 sf::Color create_highlight_color(const sf::Color& color) noexcept
 {
-    std::uint8_t r = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.r)) + 64;
-    std::uint8_t g = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.g)) + 64;
-    std::uint8_t b = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.b)) + 64;
+    const std::uint8_t r = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.r)) + 64;
+    const std::uint8_t g = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.g)) + 64;
+    const std::uint8_t b = static_cast<std::uint8_t>(0.25f * static_cast<float>(color.b)) + 64;
 
     return {r, g, b};
 }
@@ -32,7 +34,9 @@ Boid::Boid(const sf::Vector2f& position, const sf::Vector2f& velocity)
 void Boid::update(float dt)
 {
     velocity += acceleration * dt;
-    velocity = max_velocity * velocity.normalized();
+    velocity = velocity.lengthSquared() >= VECTOR_LENGTH_THRESHOLD
+                   ? max_velocity * velocity.normalized()
+                   : sf::Vector2f{};
     position += velocity * dt;
     acceleration *= 0.0f;
 }
@@ -40,15 +44,19 @@ void Boid::update(float dt)
 void Boid::steer(const sf::Vector2f& target_position)
 {
     sf::Vector2f desired_direction = target_position - position;
-    if (desired_direction.lengthSquared() < 1e-8)
+    if (desired_direction.lengthSquared() < VECTOR_LENGTH_THRESHOLD)
     {
         return;
     }
 
     desired_direction = max_velocity * desired_direction.normalized();
     sf::Vector2f steering_force = desired_direction - velocity;
-    steering_force = max_steer * steering_force.normalized();
+    if (steering_force.lengthSquared() < VECTOR_LENGTH_THRESHOLD)
+    {
+        return;
+    }
 
+    steering_force = max_steer * steering_force.normalized();
     apply_force(steering_force);
 }
 
@@ -106,28 +114,3 @@ sf::CircleShape Boid::debug_separation_radius() const noexcept
 {
     return create_debug_circle(separation_radius, position, sf::Color::Blue);
 }
-
-// sf::VertexArray Boid::debug_velocity() const noexcept
-// {
-//     sf::VertexArray arrow(sf::PrimitiveType::TriangleStrip, 4);
-//     const float angle = std::atan2(velocity.y, velocity.x);
-//     sf::Vector2f bl(-0.25f, -0.25f);
-//     sf::Vector2f br(0.25f, -0.25f);
-//     sf::Vector2f bul(-0.25f, 0.25f);
-//     sf::Vector2f bur(0.25f, 0.25f);
-//     sf::Vector2f bull(-0.375f, 0.25f);
-//     sf::Vector2f burr(0.375f, 0.25f);
-//     sf::Vector2f btop(0.0f, 0.5f);
-//     arrow[0].position = rotate_vec(bl, angle) + position;
-//     arrow[1].position = rotate_vec(br, angle) + position;
-//     arrow[2].position = rotate_vec(bul, angle) + position;
-//     arrow[3].position = rotate_vec(bur, angle) + position;
-//     // arrow[4].position = rotate_vec(burr, angle) + position;
-//     // arrow[5].position = rotate_vec(btop, angle) + position;
-//     // arrow[6].position = rotate_vec(bull, angle) + position;
-//     for (std::size_t i = 0; i < arrow.getVertexCount(); ++i)
-//     {
-//         arrow[i].color = sf::Color::Red;
-//     }
-//     return arrow;
-// }

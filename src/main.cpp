@@ -71,15 +71,15 @@ void draw_debug_panel(const Boid& boid, const BoidDebugData& debug_data, DebugSt
         ImGui::Separator();
         ImGui::Text("Alignment direction: (%.2f, %.2f)", debug_data.alignment_direction.x,
                     debug_data.alignment_direction.y);
-        ImGui::Text("Alignment Neighbor Count: %d", debug_data.alignment_neighbor_count);
+        ImGui::Text("Alignment Neighbor Count: %zu", debug_data.alignment_neighbor_count);
 
         ImGui::Text("Cohesion position: (%.2f, %.2f)", debug_data.cohesion_position.x,
                     debug_data.cohesion_position.y);
-        ImGui::Text("Cohesion Neighbor Count: %d", debug_data.cohesion_neighbor_count);
+        ImGui::Text("Cohesion Neighbor Count: %zu", debug_data.cohesion_neighbor_count);
 
         ImGui::Text("Separation direction: (%.2f, %.2f)", debug_data.separation_direction.x,
                     debug_data.separation_direction.y);
-        ImGui::Text("Separation Neighbor Count: %d", debug_data.separation_neighbor_count);
+        ImGui::Text("Separation Neighbor Count: %zu", debug_data.separation_neighbor_count);
     }
 
     ImGui::End();
@@ -131,23 +131,79 @@ void draw_debug_tools(const Boid& boid, const BoidDebugData& debug_data,
     }
 }
 
+void handle_mouse_move_event(const sf::Event::MouseMoved* mouse_move,
+                             const sf::RenderWindow& window, const ImGuiIO& io,
+                             const Simulation& simulation, DebugState& debug_state)
+{
+    if (io.WantCaptureMouse)
+    {
+        return;
+    }
+
+    const sf::Vector2f world_pos = window.mapPixelToCoords(mouse_move->position);
+    debug_state.hovered_boid_index = find_boid_at_position(simulation.get_boids(), world_pos, 1.0f);
+}
+
+void handle_mouse_click_event(const sf::Event::MouseButtonPressed* mouse_click, const ImGuiIO& io,
+                              DebugState& debug_state)
+{
+    if (io.WantCaptureMouse)
+    {
+        return;
+    }
+
+    if (mouse_click->button == sf::Mouse::Button::Left)
+    {
+        debug_state.selected_boid_index = debug_state.hovered_boid_index;
+        debug_state.show_debug_panel = (debug_state.selected_boid_index != -1);
+    }
+}
+
+void draw_scene(sf::RenderWindow& window, const Simulation& simulation, DebugState& debug_state)
+{
+    for (std::size_t i = 0; i < simulation.get_boids().size(); ++i)
+    {
+        const auto& boid = simulation.get_boids()[i];
+        const auto& debug_data = simulation.get_debug_data()[debug_state.selected_boid_index];
+        window.draw(boid.mesh());
+
+        if (debug_state.hovered_boid_index == static_cast<int>(i))
+        {
+            const auto highlight = boid.highlight();
+            window.draw(highlight);
+        }
+
+        if (debug_state.selected_boid_index == static_cast<int>(i))
+        {
+            draw_debug_tools(boid, debug_data, debug_state, window);
+        }
+    }
+
+    if (debug_state.show_debug_panel && debug_state.selected_boid_index >= 0)
+    {
+        const auto& boid = simulation.get_boids()[debug_state.selected_boid_index];
+        const auto& debug_data = simulation.get_debug_data()[debug_state.selected_boid_index];
+        draw_debug_panel(boid, debug_data, debug_state);
+    }
+}
+
 int main()
 {
-    const WorldConfig world_config{.xmin = -25.0f, .xmax = 25.0f, .ymin = -25.0f, .ymax = 25.0f};
+    const WorldConfig world_config{.xmin = -50.0f, .xmax = 50.0f, .ymin = -50.0f, .ymax = 50.0f};
 
-    const BoidConfig boid_config{.vmin = 2.0f,
-                                 .vmax = 2.0f,
-                                 .steermin = 6.0f,
-                                 .steermax = 6.0f,
-                                 .alignment_radius_min = 5.0f,
-                                 .alignment_radius_max = 5.0f,
-                                 .cohesion_radius_min = 5.0f,
-                                 .cohesion_radius_max = 5.0f,
-                                 .separation_radius_min = 5.0f,
-                                 .separation_radius_max = 5.0f};
+    const BoidConfig boid_config{.vmin = 4.0f,
+                                 .vmax = 4.0f,
+                                 .steermin = 12.0f,
+                                 .steermax = 12.0f,
+                                 .alignment_radius_min = 7.0f,
+                                 .alignment_radius_max = 7.0f,
+                                 .cohesion_radius_min = 7.0f,
+                                 .cohesion_radius_max = 7.0f,
+                                 .separation_radius_min = 7.0f,
+                                 .separation_radius_max = 7.0f};
 
     const SimConfig sim_config{.seed = 42,
-                               .count = 100,
+                               .count = 500,
                                .dt = 1.0f / 60.0f,
                                .w_alignment = 1.0f,
                                .w_cohesion = 1.0f,
@@ -196,28 +252,12 @@ int main()
 
             if (const auto* mouse_move = event->getIf<sf::Event::MouseMoved>())
             {
-                if (io.WantCaptureMouse)
-                {
-                    continue;
-                }
-
-                const sf::Vector2f world_pos = window.mapPixelToCoords(mouse_move->position);
-                debug_state.hovered_boid_index =
-                    find_boid_at_position(simulation.get_boids(), world_pos, 2.0f);
+                handle_mouse_move_event(mouse_move, window, io, simulation, debug_state);
             }
 
             if (const auto* mouse_click = event->getIf<sf::Event::MouseButtonPressed>())
             {
-                if (io.WantCaptureMouse)
-                {
-                    continue;
-                }
-
-                if (mouse_click->button == sf::Mouse::Button::Left)
-                {
-                    debug_state.selected_boid_index = debug_state.hovered_boid_index;
-                    debug_state.show_debug_panel = (debug_state.selected_boid_index != -1);
-                }
+                handle_mouse_click_event(mouse_click, io, debug_state);
             }
         }
 
@@ -232,34 +272,8 @@ int main()
 
         // Rendering
         window.clear({127, 127, 127});
-
-        for (std::size_t i = 0; i < simulation.get_boids().size(); ++i)
-        {
-            const auto& boid = simulation.get_boids()[i];
-            const auto& debug_data = simulation.get_debug_data()[debug_state.selected_boid_index];
-            window.draw(boid.mesh());
-
-            if (debug_state.hovered_boid_index == static_cast<int>(i))
-            {
-                const auto highlight = boid.highlight();
-                window.draw(highlight);
-            }
-
-            if (debug_state.selected_boid_index == static_cast<int>(i))
-            {
-                draw_debug_tools(boid, debug_data, debug_state, window);
-            }
-        }
-
-        if (debug_state.show_debug_panel && debug_state.selected_boid_index >= 0)
-        {
-            const auto& boid = simulation.get_boids()[debug_state.selected_boid_index];
-            const auto& debug_data = simulation.get_debug_data()[debug_state.selected_boid_index];
-            draw_debug_panel(boid, debug_data, debug_state);
-        }
-
+        draw_scene(window, simulation, debug_state);
         ImGui::SFML::Render(window);
-
         window.display();
     }
 

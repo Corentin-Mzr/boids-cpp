@@ -187,7 +187,8 @@ void Simulation::separation(Boid& b, const std::vector<Boid>& snapshot,
             continue;
         }
 
-        position_diff += delta / dist_sq;
+        const float exp_decr = b.separation_radius / dist_sq;
+        position_diff += delta.normalized() * exp_decr;
     }
 
     position_diff /= static_cast<float>(neighbors.size());
