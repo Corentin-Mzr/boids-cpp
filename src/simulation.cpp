@@ -6,11 +6,13 @@ Simulation::Simulation(const WorldConfig& world_config, const BoidConfig& boid_c
     : world_config(world_config), boid_config(boid_config), sim_config(sim_config)
 {
     boids = create_random_boids();
+    debug_data.resize(boids.size());
 }
 
-void Simulation::step()
+void Simulation::step(bool enable_debug)
 {
-    apply_boid_rules();
+    debug_data.assign(boids.size(), {});
+    apply_boid_rules(enable_debug);
 
     for (auto& b : boids)
     {
@@ -23,6 +25,11 @@ void Simulation::step()
 const std::vector<Boid>& Simulation::get_boids() const noexcept
 {
     return boids;
+}
+
+const std::vector<BoidDebugData>& Simulation::get_debug_data() const noexcept
+{
+    return debug_data;
 }
 
 std::vector<Boid> Simulation::create_random_boids() const
@@ -119,7 +126,8 @@ std::vector<std::size_t> Simulation::find_nearest_boids(std::size_t i,
 }
 
 void Simulation::alignment(Boid& b, const std::vector<Boid>& snapshot,
-                           const std::vector<std::size_t>& neighbors, float weight)
+                           const std::vector<std::size_t>& neighbors, float weight,
+                           std::optional<std::reference_wrapper<BoidDebugData>> debug)
 {
     sf::Vector2f average_velocity;
     for (const auto j : neighbors)
@@ -130,11 +138,20 @@ void Simulation::alignment(Boid& b, const std::vector<Boid>& snapshot,
     average_velocity /= static_cast<float>(neighbors.size());
     average_velocity *= weight;
 
-    b.steer(b.position + average_velocity);
+    const sf::Vector2f steering_direction = b.position + average_velocity;
+
+    if (debug.has_value())
+    {
+        debug->get().alignment_direction = steering_direction;
+        debug->get().alignment_neighbor_count = neighbors.size();
+    }
+
+    b.steer(steering_direction);
 }
 
 void Simulation::cohesion(Boid& b, const std::vector<Boid>& snapshot,
-                          const std::vector<std::size_t>& neighbors, float weight)
+                          const std::vector<std::size_t>& neighbors, float weight,
+                          std::optional<std::reference_wrapper<BoidDebugData>> debug)
 {
     sf::Vector2f average_position;
     for (const auto j : neighbors)
@@ -145,11 +162,19 @@ void Simulation::cohesion(Boid& b, const std::vector<Boid>& snapshot,
     average_position /= static_cast<float>(neighbors.size());
 
     const sf::Vector2f target = average_position * weight + b.position * (1.0f - weight);
+
+    if (debug.has_value())
+    {
+        debug->get().cohesion_position = target;
+        debug->get().cohesion_neighbor_count = neighbors.size();
+    }
+
     b.steer(target);
 }
 
 void Simulation::separation(Boid& b, const std::vector<Boid>& snapshot,
-                            const std::vector<std::size_t>& neighbors, float weight)
+                            const std::vector<std::size_t>& neighbors, float weight,
+                            std::optional<std::reference_wrapper<BoidDebugData>> debug)
 {
     sf::Vector2f position_diff;
     for (const auto j : neighbors)
@@ -168,10 +193,18 @@ void Simulation::separation(Boid& b, const std::vector<Boid>& snapshot,
     position_diff /= static_cast<float>(neighbors.size());
     position_diff *= weight;
 
-    b.steer(b.position + position_diff);
+    const sf::Vector2f steering_direction = b.position + position_diff;
+
+    if (debug.has_value())
+    {
+        debug->get().separation_direction = steering_direction;
+        debug->get().separation_neighbor_count = neighbors.size();
+    }
+
+    b.steer(steering_direction);
 }
 
-void Simulation::apply_boid_rules()
+void Simulation::apply_boid_rules(bool enable_debug)
 {
     const std::vector<Boid> snapshot = boids;
 
@@ -180,20 +213,21 @@ void Simulation::apply_boid_rules()
         const auto nearest_align = find_nearest_boids(i, snapshot, boids[i].alignment_radius);
         const auto nearest_cohesion = find_nearest_boids(i, snapshot, boids[i].cohesion_radius);
         const auto nearest_separation = find_nearest_boids(i, snapshot, boids[i].separation_radius);
+        auto debug = enable_debug ? std::optional(std::ref(debug_data[i])) : std::nullopt;
 
         if (!nearest_align.empty())
         {
-            alignment(boids[i], snapshot, nearest_align, sim_config.w_alignment);
+            alignment(boids[i], snapshot, nearest_align, sim_config.w_alignment, debug);
         }
 
         if (!nearest_cohesion.empty())
         {
-            cohesion(boids[i], snapshot, nearest_cohesion, sim_config.w_cohesion);
+            cohesion(boids[i], snapshot, nearest_cohesion, sim_config.w_cohesion, debug);
         }
 
         if (!nearest_separation.empty())
         {
-            separation(boids[i], snapshot, nearest_separation, sim_config.w_separation);
+            separation(boids[i], snapshot, nearest_separation, sim_config.w_separation, debug);
         }
     }
 }

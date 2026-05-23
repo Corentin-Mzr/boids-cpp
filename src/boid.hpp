@@ -42,3 +42,15 @@ public:
     // Rendering
     sf::Color color = sf::Color::White;
 };
+
+struct BoidDebugData
+{
+    sf::Vector2f alignment_direction;
+    std::size_t alignment_neighbor_count = 0;
+
+    sf::Vector2f cohesion_position;
+    std::size_t cohesion_neighbor_count = 0;
+
+    sf::Vector2f separation_direction;
+    std::size_t separation_neighbor_count = 0;
+};

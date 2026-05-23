@@ -1,6 +1,7 @@
 #pragma once
 
 #include "boid.hpp"
+#include <optional>
 
 // About the world: a rectangle where boids spawn
 struct WorldConfig
@@ -49,16 +50,19 @@ public:
     Simulation(Simulation&&) = default;
     Simulation& operator=(Simulation&&) = default;
 
-    void step();
+    void step(bool enable_debug = false);
 
     [[nodiscard]]
     const std::vector<Boid>& get_boids() const noexcept;
+
+    [[nodiscard]]
+    const std::vector<BoidDebugData>& get_debug_data() const noexcept;
 
 private:
     [[nodiscard]]
     std::vector<Boid> create_random_boids() const;
 
-    void apply_boid_rules();
+    void apply_boid_rules(bool enable_debug);
     void handle_boundaries();
 
     // Returns indices of boids closest to the i-th boid
@@ -66,12 +70,17 @@ private:
     static std::vector<std::size_t>
     find_nearest_boids(std::size_t i, const std::vector<Boid>& snapshot, float perception_radius);
 
-    static void alignment(Boid& b, const std::vector<Boid>& snapshot,
-                          const std::vector<std::size_t>& neighbors, float weight);
+    static void
+    alignment(Boid& b, const std::vector<Boid>& snapshot, const std::vector<std::size_t>& neighbors,
+              float weight,
+              std::optional<std::reference_wrapper<BoidDebugData>> debug = std::nullopt);
     static void cohesion(Boid& b, const std::vector<Boid>& snapshot,
-                         const std::vector<std::size_t>& neighbors, float weight);
-    static void separation(Boid& b, const std::vector<Boid>& snapshot,
-                           const std::vector<std::size_t>& neighbors, float weight);
+                         const std::vector<std::size_t>& neighbors, float weight,
+                         std::optional<std::reference_wrapper<BoidDebugData>> debug = std::nullopt);
+    static void
+    separation(Boid& b, const std::vector<Boid>& snapshot,
+               const std::vector<std::size_t>& neighbors, float weight,
+               std::optional<std::reference_wrapper<BoidDebugData>> debug = std::nullopt);
 
 private:
     WorldConfig world_config;
@@ -79,4 +88,5 @@ private:
     SimConfig sim_config;
 
     std::vector<Boid> boids;
+    std::vector<BoidDebugData> debug_data;
 };
